@@ -1,0 +1,41 @@
+{
+  "name": "libremail-watcher",
+  "version": "1.0.0",
+  "description": "Watch imap connections for new events and run sync if needed.",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/tsc -p ./tsconfig.json",
+    "interactive": "./node_modules/.bin/ts-node src/index.ts",
+    "watch": "./node_modules/.bin/tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/dotenv": "^4.0.3",
+    "@types/imap": "^0.8.29",
+    "@types/node": "^10.1.0",
+    "@types/imap-simple": "^4.2.2",
+    "@types/dotenv": "^8.2.0",
+    "@types/mysql": "^2.15.9",
+    "types/mysql2": "git://github.com/types/mysql2.git",
+    "@types/bluebird": "^3.5.30",
+    "dotenv": "^5.0.1",
+    "imap": "^0.8.19",
+    "imap-simple": "^4.3.0",
+    "dotenv": "^8.2.0",
+    "reflect-metadata": "^0.1.13",
+    "tsyringe": "^4.1.0",
+    "mysql2": "^2.1.0",
+    "util": "^0.12.2",
+    "ts-process-promises": "^1.0.2"
+  },
+  "devDependencies": {
+    "ts-node": "^6.0.3",
+    "typescript": "^2.8.3"
+  },
+  "engines": {
+    "node": ">=8.2.1",
+    "npm": ">=5.3.0"
+  }
+}
