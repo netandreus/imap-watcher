@@ -23,10 +23,10 @@ dotEnv.config();
     let hostname = os.hostname();
     // DatabaseConnection
     let mysqlOptions = {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_DATABASE
+        host: process.env.DATABASE_HOST,
+        user: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME
     };
     let shutdownWithError = function (err: MysqlError) {
         console.log('[ Database ] Can not connect. Server error code: '+err.code+', Server response: '+err.message);
