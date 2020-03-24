@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "./node_modules/.bin/tsc -p ./tsconfig.json",
+    "run": "node ./dist/index.js",
+    "execute": "bin/watcher",
     "interactive": "./node_modules/.bin/ts-node src/index.ts",
     "watch": "./node_modules/.bin/tsc --watch"
   },
