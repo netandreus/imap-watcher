@@ -1,0 +1,18 @@
+{
+  "name": "netandreus/imap-watcher",
+  "type": "library",
+  "description": "Watch IMAP events mail / update / expurge etc and reacts to it.",
+  "keywords": [],
+  "license": "MIT",
+  "homepage": "https://github.com/netandreus/imap-watcher",
+  "authors": [
+    {
+      "name": "Andrey Tokarchuk",
+      "email": "netandreus@gmail.com"
+    }
+  ],
+  "require": {
+  },
+  "require-dev": {
+  }
+}
