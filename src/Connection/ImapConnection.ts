@@ -72,7 +72,10 @@ export default class ImapConnection extends AbstractConnection
                     password: account.password,
                     host: account.imapHost,
                     port: account.imapPort,
-                    tls: false, // tls: tls
+                    tls: tls, // tls: tls
+                    tlsOptions: {
+                        rejectUnauthorized: false
+                    },
                     authTimeout: authTimeout,
                     connTimeout: connTimeout
                 }

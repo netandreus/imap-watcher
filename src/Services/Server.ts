@@ -46,21 +46,23 @@ export default class Server
     {
         let promises: Promise<ImapSimple>[];
         this.imapConnections = this.accounts.map((account: Account) => {
-            return new ImapConnection(
-                account,
-                Boolean(process.env.MAIL_TLS),
-                Number(process.env.MAIL_AUTH_TIMEOUT),
-                Number(process.env.MAIL_CONN_TIMEOUT),
-                onMail,
-                onUpdate,
-                onExpunge,
-                onReady,
-                onAlert,
-                onUidvalidity,
-                onError,
-                onClose,
-                onEnd
-            );
+            if (account.isActive) {
+                return new ImapConnection(
+                    account,
+                    Boolean(process.env.MAIL_TLS),
+                    Number(process.env.MAIL_AUTH_TIMEOUT),
+                    Number(process.env.MAIL_CONN_TIMEOUT),
+                    onMail,
+                    onUpdate,
+                    onExpunge,
+                    onReady,
+                    onAlert,
+                    onUidvalidity,
+                    onError,
+                    onClose,
+                    onEnd
+                );
+            }
         });
         promises = this.imapConnections.map((connection: ImapConnection) => {
             return connection.connect();
