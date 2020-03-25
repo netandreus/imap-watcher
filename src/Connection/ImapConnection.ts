@@ -233,7 +233,7 @@ export default class ImapConnection extends AbstractConnection
      */
     public async runSync(email?: string, folder?: string)
     {
-        let command = process.env.SYNC_PATH + ' --once';
+        let command = process.env.WATCHER_SYNC_PATH + ' --once';
         if (email) {
             command += ' --email '+this.account.email;
         }

@@ -49,9 +49,9 @@ export default class Server
             if (account.isActive) {
                 return new ImapConnection(
                     account,
-                    Boolean(process.env.MAIL_TLS),
-                    Number(process.env.MAIL_AUTH_TIMEOUT),
-                    Number(process.env.MAIL_CONN_TIMEOUT),
+                    Boolean(process.env.WATCHER_MAIL_TLS),
+                    Number(process.env.WATCHER_MAIL_AUTH_TIMEOUT),
+                    Number(process.env.WATCHER_MAIL_CONN_TIMEOUT),
                     onMail,
                     onUpdate,
                     onExpunge,

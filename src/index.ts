@@ -33,8 +33,8 @@ dotEnv.config();
         process.exit(1);
     };
     let databaseConnection = new DatabaseConnection(mysqlOptions, {
-        attempts: Number(process.env.MAX_ATTEMPTS_COUNT),
-        timeout:  Number(process.env.ATTEMPTS_TIMEOUT)
+        attempts: Number(process.env.WATCHER_MAX_ATTEMPTS_COUNT),
+        timeout:  Number(process.env.WATCHER_ATTEMPTS_TIMEOUT)
     }, shutdownWithError);
 
     // Server
