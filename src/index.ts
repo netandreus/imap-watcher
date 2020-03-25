@@ -10,11 +10,27 @@ import Server from "./Services/Server";
 import ImapConnection, {OnExpunge, OnMail, OnUpdate} from "./Connection/ImapConnection";
 import {exec, ExecResult} from 'ts-process-promises';
 import * as os from 'os';
+import * as fs from 'fs';
 import {PromiseWithEvents} from "ts-process-promises/lib/PromiseWithEvents";
 import {FolderSyncStatus} from "./Enum/FolderSyncStatus";
 import {MysqlError} from "mysql";
 
 dotEnv.config();
+
+/**
+ * Check sync executable available
+ */
+try {
+    if (!fs.existsSync(process.env.WATCHER_SYNC_PATH)) {
+        console.error('[ ERROR ] Sync executable in path "'+process.env.WATCHER_SYNC_PATH+'" does not exists.'+
+            ' Please change WATCHER_SYNC_PATH in your .env file');
+        process.exit(1);
+    }
+} catch(err) {
+    console.error(err);
+    process.exit(1);
+}
+
 
 (async () => {
     /**
@@ -64,7 +80,7 @@ dotEnv.config();
                     await server.updateFolderStatus(connection.account, folderName, FolderSyncStatus.SyncingNeedResync);
                 }
             } else {
-                await this.runSync(connection.account.email, folderName);
+                await connection.runSync(folderName);
             }
         });
     };

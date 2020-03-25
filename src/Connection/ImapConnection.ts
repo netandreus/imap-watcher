@@ -231,8 +231,9 @@ export default class ImapConnection extends AbstractConnection
      * @param email
      * @param folder
      */
-    public async runSync(email?: string, folder?: string)
+    public async runSync(folder?: string)
     {
+        let email = this.account.email;
         let command = process.env.WATCHER_SYNC_PATH + ' --once';
         if (email) {
             command += ' --email '+this.account.email;
@@ -240,12 +241,15 @@ export default class ImapConnection extends AbstractConnection
         if (folder) {
             command += ' --folder '+folder
         }
+
         await exec(command).on('process', (process) => {
             console.log('[ RUNNING ] SYNC pid = '+process.pid);
         }).then((result) => {
             console.log('[ COMPLETE ] Sync complete for '+email);
         }).error((error) => {
             console.log('[ ERROR ] ' + error);
+        }).catch((error) => {
+            console.log('[ ERROR ] ' + error.toString());
         });
     }
 
