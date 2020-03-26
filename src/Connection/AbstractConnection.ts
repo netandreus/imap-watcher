@@ -1,3 +1,6 @@
+import {Container} from "typedi";
+import LoggerService from "../Services/LoggerService";
+
 export type OnError = (err: Error) => void;
 export type ReconnectOptions = {
     timeout: number,
@@ -108,11 +111,11 @@ export default abstract class AbstractConnection
                     this.onConnected(this.connection).then((connection) => {
                         this.connected = true;
                     });
-                    console.log('[ '+this.constructor.name+' ] Connected');
+                    Container.get(LoggerService).log('info', 'Connected', {label: this.constructor.name});
                     resolve(connect);
                 })
-                .catch(function (e) {
-                    console.log('Try ...'+attemptCount);
+                .catch((e) => {
+                    Container.get(LoggerService).log('warn', 'Try ...'+attemptCount, {label: this.constructor.name});
                     if (attemptCount == attempts) {
                         reject(e);
                         return;
