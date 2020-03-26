@@ -6,6 +6,8 @@ import DatabaseConnection from "./DatabaseConnection";
 import Server from "../Services/Server";
 import AbstractConnection, {OnError} from "./AbstractConnection";
 import {Connection} from "types/mysql2/promise";
+import {Container} from "typedi";
+import LoggerService from "../Services/LoggerService";
 let imaps = require('imap-simple');
 // @see https://github.com/mscdex/node-imap#connection-events
 export type OnMail = (numNewMail: number) => void;
@@ -243,13 +245,13 @@ export default class ImapConnection extends AbstractConnection
         }
 
         await exec(command).on('process', (process) => {
-            console.log('[ RUNNING ] SYNC pid = '+process.pid);
+            Container.get(LoggerService).log('info', 'SYNC pid = '+process.pid, {label: 'SYNC'});
         }).then((result) => {
-            console.log('[ COMPLETE ] Sync complete for '+email);
+            Container.get(LoggerService).log('info', '[ COMPLETE ] Sync complete for '+email, {label: 'SYNC'});
         }).error((error) => {
-            console.log('[ ERROR ] ' + error);
+            Container.get(LoggerService).log('error', '[ ERROR ] ' + error, {label: 'SYNC'});
         }).catch((error) => {
-            console.log('[ ERROR ] ' + error.toString());
+            Container.get(LoggerService).log('error', '[ ERROR ] ' + error.toString(), {label: 'SYNC'});
         });
     }
 
