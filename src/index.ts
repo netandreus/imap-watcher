@@ -7,16 +7,12 @@ import dotEnv = require('dotenv');
 import DatabaseConnection from "./Connection/DatabaseConnection";
 import Server from "./Services/Server";
 import ImapConnection, {OnExpunge, OnMail, OnUpdate} from "./Connection/ImapConnection";
-import {exec, ExecResult} from 'ts-process-promises';
 import * as os from 'os';
 import * as fs from 'fs';
-import {PromiseWithEvents} from "ts-process-promises/lib/PromiseWithEvents";
 import {FolderSyncStatus} from "./Enum/FolderSyncStatus";
 import {MysqlError} from "mysql";
-import { createLogger, format, transports, Logger } from "winston";
 import LoggerService from "./Services/LoggerService";
 import {Container, Token} from "typedi";
-import * as winston from "winston";
 
 dotEnv.config();
 
