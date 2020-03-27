@@ -1,0 +1,25 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          imap_watcher
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      1 0 6
+# Short-Description: Imap watcher systemd script
+### END INIT INFO
+
+PREFIX=/var/www/imap_watcher
+
+case "$1" in
+start)
+         su - www-data -c "cd ${PREFIX}; ./node_modules/.bin/pm2 start process.yml&"
+        ;;
+stop)
+         su - www-data -c "cd ${PREFIX}; ./node_modules/.bin/pm2 stop process.yml"
+        ;;
+*)
+        echo "Usage: `basename $0` {start|stop}" >&2
+        ;;
+esac
+
+exit 0
