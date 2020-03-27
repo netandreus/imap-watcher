@@ -129,3 +129,4 @@ let logger = Container.get(LoggerService);
         .on('uncaughtException', onAppCloseHandler);
 })();
 logger.log('info', 'Started watcher...');
+process.send('ready');
