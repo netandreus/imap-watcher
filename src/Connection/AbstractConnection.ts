@@ -6,6 +6,9 @@ export type ReconnectOptions = {
     timeout: number,
     attempts: number
 };
+export type AbstractConnectionOptions = {
+    internalOptions?: {}
+};
 export default abstract class AbstractConnection
 {
     private readonly _options: {};

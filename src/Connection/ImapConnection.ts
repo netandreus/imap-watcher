@@ -1,13 +1,10 @@
 import {ImapSimple, Message} from "imap-simple";
 import Account from "../Entity/Account";
 import {exec} from "ts-process-promises";
-import {container} from "tsyringe";
-import DatabaseConnection from "./DatabaseConnection";
-import Server from "../Services/Server";
-import AbstractConnection, {OnError} from "./AbstractConnection";
-import {Connection} from "types/mysql2/promise";
+import AbstractConnection, {OnError, ReconnectOptions, AbstractConnectionOptions} from "./AbstractConnection";
 import {Container} from "typedi";
 import LoggerService from "../Services/LoggerService";
+
 let imaps = require('imap-simple');
 // @see https://github.com/mscdex/node-imap#connection-events
 export type OnMail = (numNewMail: number) => void;
@@ -19,21 +16,25 @@ export type OnUidvalidity = (uidvalidity: number) => void;
 export type OnClose = (hadError: boolean) => void;
 export type OnEnd = () => void;
 
-type ConnectionOptions = {
-    imap: {
-        user: string,
-        password: string,
-        host: string,
-        port: number,
-        tls: boolean,
-        authTimeout: number
-    }
-};
+export type ImapConnectionOptions = AbstractConnectionOptions & {
+    onError: OnError;
+    authTimeout: number;
+    onMail: OnMail;
+    connTimeout: number;
+    onAlert: OnAlert;
+    onClose: OnClose;
+    onEnd: OnEnd;
+    onExpunge: OnExpunge;
+    tls: boolean;
+    onUidvalidity: OnUidvalidity;
+    onUpdate: OnUpdate;
+    account: Account;
+    onReady: OnReady
+}
 
 export default class ImapConnection extends AbstractConnection
 {
     protected _connection: ImapSimple;
-
     private _account: Account;
     private _onMail: OnMail;
     private _onUpdate: OnUpdate;
@@ -53,66 +54,54 @@ export default class ImapConnection extends AbstractConnection
     }
 
     constructor(
-        account: Account,
-        tls: boolean,
-        authTimeout: number,
-        connTimeout: number,
-        onMail?: OnMail,
-        onUpdate?: OnUpdate,
-        onExpunge?: OnExpunge,
-        onReady?: OnReady,
-        onAlert?: OnAlert,
-        onUidvalidity?: OnUidvalidity,
-        onError?: OnError,
-        onClose?: OnClose,
-        onEnd?: OnEnd
+        options: ImapConnectionOptions,
+        reconnectOptions: ReconnectOptions = {timeout: 300, attempts: 3},
+        onError: OnError = () => {
+        }
     ) {
         super(
             {
                 imap: {
-                    user: account.email,
-                    password: account.password,
-                    host: account.imapHost,
-                    port: account.imapPort,
-                    tls: tls, // tls: tls
+                    user: options.account.email,
+                    password: options.account.password,
+                    host: options.account.imapHost,
+                    port: options.account.imapPort,
+                    tls: options.tls, // tls: tls
                     tlsOptions: {
                         rejectUnauthorized: false
                     },
-                    authTimeout: authTimeout,
-                    connTimeout: connTimeout
+                    authTimeout: options.authTimeout,
+                    connTimeout: options.connTimeout
                 }
             },
-            {
-                timeout: 300,
-                attempts: 3
-            },
-            onError? onError : () => {}
+            reconnectOptions,
+            onError
             );
         this.connected = false;
-        this.account = account;
+        this.account = options.account;
 
-        this.onMail = onMail ? onMail : () => {};
+        this.onMail = options.onMail ? options.onMail : () => {};
         this.onMail = this.onMail.bind(this);
 
-        this.onUpdate = onUpdate ? onUpdate : () => {};
+        this.onUpdate = options.onUpdate ? options.onUpdate : () => {};
         this.onUpdate = this.onUpdate.bind(this);
 
-        this.onExpunge = onExpunge ? onExpunge : () => {};
+        this.onExpunge = options.onExpunge ? options.onExpunge : () => {};
         this.onExpunge = this.onExpunge.bind(this);
 
-        this.onReady = onReady ? onReady : () => {};
+        this.onReady = options.onReady ? options.onReady : () => {};
         this.onReady = this.onReady.bind(this);
 
-        this.onAlert = onAlert ? onAlert : () => {};
+        this.onAlert = options.onAlert ? options.onAlert : () => {};
         this.onAlert = this.onAlert.bind(this);
 
-        this.onUidvalidity = onUidvalidity ? onUidvalidity : () => {};
+        this.onUidvalidity = options.onUidvalidity ? options.onUidvalidity : () => {};
         this.onUidvalidity = this.onUidvalidity.bind(this);
 
-        this.onClose = onClose ? onClose : () => {};
+        this.onClose = options.onClose ? options.onClose : () => {};
         this.onClose = this.onClose.bind(this);
 
-        this.onEnd = onEnd ? onEnd : () => {};
+        this.onEnd = options.onEnd ? options.onEnd : () => {};
         this.onEnd = this.onEnd.bind(this);
 
     }
