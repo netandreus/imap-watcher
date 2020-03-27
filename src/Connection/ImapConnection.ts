@@ -224,6 +224,7 @@ export default class ImapConnection extends AbstractConnection
      */
     public async runSync(folder?: string)
     {
+        let logger = Container.get(LoggerService);
         let email = this.account.email;
         let command = process.env.WATCHER_SYNC_PATH + ' --once';
         if (email) {
@@ -234,13 +235,13 @@ export default class ImapConnection extends AbstractConnection
         }
 
         await exec(command).on('process', (process) => {
-            Container.get(LoggerService).log('info', 'SYNC pid = '+process.pid, {label: 'SYNC'});
+            logger.log('info', 'SYNC pid = '+process.pid, {label: 'SYNC'});
         }).then((result) => {
-            Container.get(LoggerService).log('info', '[ COMPLETE ] Sync complete for '+email, {label: 'SYNC'});
+            logger.log('info', '[ COMPLETE ] Sync complete for '+email, {label: 'SYNC'});
         }).error((error) => {
-            Container.get(LoggerService).log('error', '[ ERROR ] ' + error, {label: 'SYNC'});
+            logger.log('error', '[ ERROR ] ' + error, {label: 'SYNC'});
         }).catch((error) => {
-            Container.get(LoggerService).log('error', '[ ERROR ] ' + error.toString(), {label: 'SYNC'});
+            logger.log('error', '[ ERROR ] ' + error.toString(), {label: 'SYNC'});
         });
     }
 

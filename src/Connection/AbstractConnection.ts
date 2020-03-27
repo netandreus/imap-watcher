@@ -103,6 +103,7 @@ export default abstract class AbstractConnection
 
     async connect(err?: Error): Promise<any>
     {
+        let logger = Container.get(LoggerService);
         let callback = (resolve, reject, attemptCount: number = 0) => {
             let [attempts, timeout] = [
                 this.reconnectOptions.attempts,
@@ -114,11 +115,11 @@ export default abstract class AbstractConnection
                     this.onConnected(this.connection).then((connection) => {
                         this.connected = true;
                     });
-                    Container.get(LoggerService).log('info', 'Connected', {label: this.constructor.name});
+                    logger.log('info', 'Connected', {label: this.constructor.name});
                     resolve(connect);
                 })
                 .catch((e) => {
-                    Container.get(LoggerService).log('warn', 'Try ...'+attemptCount, {label: this.constructor.name});
+                    logger.log('warn', 'Try ...'+attemptCount, {label: this.constructor.name});
                     if (attemptCount == attempts) {
                         reject(e);
                         return;
