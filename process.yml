@@ -1,0 +1,8 @@
+# Config file for pm2
+# @see https://www.npmjs.com/package/pm2
+apps:
+  - name: imap_watcher
+    script: dist/index.js
+    instances: 1
+    exec_mode: cluster
+    watch  : true

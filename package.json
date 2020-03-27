@@ -8,7 +8,11 @@
     "run": "node ./dist/index.js",
     "execute": "bin/watcher",
     "interactive": "./node_modules/.bin/ts-node src/index.ts",
-    "watch": "./node_modules/.bin/tsc --watch"
+    "watch": "./node_modules/.bin/tsc --watch",
+    "start": "./node_modules/.bin/pm2 start process.yml",
+    "stop": "./node_modules/.bin/pm2 stop process.yml",
+    "monit": "./node_modules/.bin/pm2 monit",
+    "list": "./node_modules/.bin/pm2 list"
   },
   "keywords": [],
   "author": "",
@@ -32,7 +36,8 @@
     "ts-process-promises": "^1.0.2",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.2",
-    "typedi": "^0.8.0"
+    "typedi": "^0.8.0",
+    "pm2": "^4.2.3"
   },
   "devDependencies": {
     "ts-node": "^6.0.3",

@@ -77,6 +77,14 @@ export default class Server
         await Promise.all(promises).catch(onConnectionError);
     }
 
+    async disconnectFromAllImaps(onError: OnError)
+    {
+        let promises = this.imapConnections.map((connection: ImapConnection) => {
+            return connection.closeConnection();
+        });
+        await Promise.all(promises).catch(onError);
+    }
+
     get accounts(): Account[] {
         return this._accounts;
     }

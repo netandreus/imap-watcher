@@ -116,6 +116,16 @@ let logger = Container.get(LoggerService);
         function (this: ImapConnection) {logger.log( 'info',  'IMAP end');}
     );
     logger.log('info',  'Connected to '+server.imapConnections.length+' active imap servers.');
-})();
 
+    // App exit handlers
+    let onAppCloseHandler = async() => {
+        await server.disconnectFromAllImaps((err: Error) => {logger.log('error',  err.message);});
+        await databaseConnection.closeConnection();
+        logger.log('warn', 'Exit signal received. All connection closed.');
+        process.exit(0);
+    };
+    process.on('SIGTERM', onAppCloseHandler)
+        .on('SIGINT', onAppCloseHandler)
+        .on('uncaughtException', onAppCloseHandler);
+})();
 logger.log('info', 'Started watcher...');
