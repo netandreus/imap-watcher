@@ -1,5 +1,4 @@
-import {Container} from "typedi";
-import LoggerService from "../Services/LoggerService";
+import {Logger} from "winston";
 
 export type OnError = (err: Error) => void;
 export type ReconnectOptions = {
@@ -13,6 +12,7 @@ export default abstract class AbstractConnection
 {
     private readonly _options: {};
     protected _connection: {};
+    private readonly _logger: Logger;
     /**
      * Set after openBox(!), to prevent first 'mail' event, during openBox
      */
@@ -25,10 +25,12 @@ export default abstract class AbstractConnection
     private _attemptsMade: number;
 
     constructor(
+        logger: Logger,
         options: {},
         reconnectOptions: ReconnectOptions = { timeout: 300, attempts: 3},
         onError: OnError = () => {}
     ) {
+        this._logger = logger;
         this._options = options;
         this.connection = null;
         this.connected = false;
@@ -103,7 +105,6 @@ export default abstract class AbstractConnection
 
     async connect(err?: Error): Promise<any>
     {
-        let logger = Container.get(LoggerService);
         let callback = (resolve, reject, attemptCount: number = 0) => {
             let [attempts, timeout] = [
                 this.reconnectOptions.attempts,
@@ -115,11 +116,11 @@ export default abstract class AbstractConnection
                     this.onConnected(this.connection).then((connection) => {
                         this.connected = true;
                     });
-                    logger.log('info', 'Connected', {label: this.constructor.name});
+                    this.logger.log('info', '['+this.constructor.name+'] Connected');
                     resolve(connect);
                 })
                 .catch((e) => {
-                    logger.log('warn', 'Try ...'+attemptCount, {label: this.constructor.name});
+                    this.logger.log('warn', '['+this.constructor.name+'] Try ...'+attemptCount);
                     if (attemptCount == attempts) {
                         reject(e);
                         return;
@@ -131,6 +132,10 @@ export default abstract class AbstractConnection
                 });
         };
         return new Promise<any>(callback);
+    }
+
+    get logger(): Logger {
+        return this._logger;
     }
 
     abstract async closeConnection(): Promise<void>;

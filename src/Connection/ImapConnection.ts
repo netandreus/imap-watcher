@@ -2,8 +2,7 @@ import {ImapSimple, Message} from "imap-simple";
 import Account from "../Entity/Account";
 import {exec} from "ts-process-promises";
 import AbstractConnection, {OnError, ReconnectOptions, AbstractConnectionOptions} from "./AbstractConnection";
-import {Container} from "typedi";
-import LoggerService from "../Services/LoggerService";
+import {Logger} from "winston";
 
 let imaps = require('imap-simple');
 // @see https://github.com/mscdex/node-imap#connection-events
@@ -54,12 +53,14 @@ export default class ImapConnection extends AbstractConnection
     }
 
     constructor(
+        logger: Logger,
         options: ImapConnectionOptions,
         reconnectOptions: ReconnectOptions = {timeout: 300, attempts: 3},
         onError: OnError = () => {
         }
     ) {
         super(
+            logger,
             {
                 imap: {
                     user: options.account.email,
@@ -224,7 +225,6 @@ export default class ImapConnection extends AbstractConnection
      */
     public async runSync(folder?: string)
     {
-        let logger = Container.get(LoggerService);
         let email = this.account.email;
         let command = process.env.WATCHER_SYNC_PATH + ' --once';
         if (email) {
@@ -235,14 +235,13 @@ export default class ImapConnection extends AbstractConnection
         }
 
         await exec(command).on('process', (process) => {
-            logger.log('info', 'SYNC pid = '+process.pid, {label: 'SYNC'});
+            this.logger.log('info', '[ SYNC ] SYNC pid = '+process.pid);
         }).then((result) => {
-            logger.log('info', '[ COMPLETE ] Sync complete for '+email, {label: 'SYNC'});
+            this.logger.log('info', '[ SYNC.COMPLETE ] Sync complete for '+email);
         }).error((error) => {
-            logger.log('error', '[ ERROR ] ' + error, {label: 'SYNC'});
+            this.logger.log('error', '[ SYNC.ERROR ] ' + error);
         }).catch((error) => {
-            logger.log('error', '[ ERROR ] ' + error.toString(), {label: 'SYNC'});
+            this.logger.log('error', '[ SYNC.ERROR ] ' + error.toString());
         });
     }
-
 }

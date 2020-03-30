@@ -3,64 +3,21 @@
  * @author Andrey Tokarchuk <netandreus@gmail.com>
  */
 import "reflect-metadata";
-import dotEnv = require('dotenv');
-import DatabaseConnection from "./Connection/DatabaseConnection";
-import Server from "./Services/Server";
 import ImapConnection, {OnExpunge, OnMail, OnUpdate} from "./Connection/ImapConnection";
-import * as os from 'os';
-import * as fs from 'fs';
 import {FolderSyncStatus} from "./Enum/FolderSyncStatus";
-import {MysqlError} from "mysql";
-import LoggerService from "./Services/LoggerService";
-import {Container, Token} from "typedi";
-
-dotEnv.config();
+import Application from "./Services/Application";
 
 /**
- * Check sync executable available
+ * Init
  */
-try {
-    if (!fs.existsSync(process.env.WATCHER_SYNC_PATH)) {
-        console.error('[ ERROR ] Sync executable in path "'+process.env.WATCHER_SYNC_PATH+'" does not exists.'+
-            ' Please change WATCHER_SYNC_PATH in your .env file');
-        process.exit(1);
-    }
-} catch(err) {
-    console.error(err);
-    process.exit(1);
-}
-
-let logger = Container.get(LoggerService);
+let application = Application.instance;
+let logger = application.logger;
 
 (async () => {
-    /**
-     * Init services
-     */
-    let hostname = os.hostname();
-    // DatabaseConnection
-    let mysqlOptions = {
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME
-    };
-    let shutdownWithError = function (err: MysqlError) {
-        logger.log('error','[ Database ] Can not connect. Server error code: '+err.code+', Server response: '+err.message);
-        process.exit(1);
-    };
-    let databaseConnection = new DatabaseConnection(mysqlOptions, {
-        attempts: Number(process.env.WATCHER_MAX_ATTEMPTS_COUNT),
-        timeout:  Number(process.env.WATCHER_ATTEMPTS_TIMEOUT)
-    }, shutdownWithError);
-
-    // Server
-    let server = new Server(databaseConnection);
-    Container.set(Server, server);
-
-    await databaseConnection.connect().catch(shutdownWithError);
+    await application.databaseConnection.connect().catch(application.shutdownHandler);
+    let server = application.server;
 
     await server.loadAccounts();
-    logger.log('info', 'Loaded '+server.accounts.length+' accounts');
 
     // Callbacks for events
     let onImapConnectionError = function (this: ImapConnection, err: Error) {
@@ -104,6 +61,7 @@ let logger = Container.get(LoggerService);
     };
 
     await server.connectToAllImaps(
+        logger,
         onImapConnectionError,
         onMail,
         onUpdate,
@@ -120,7 +78,7 @@ let logger = Container.get(LoggerService);
     // App exit handlers
     let onAppCloseHandler = async() => {
         await server.disconnectFromAllImaps((err: Error) => {logger.log('error',  err.message);});
-        await databaseConnection.closeConnection();
+        await server.dbConnection.closeConnection();
         logger.log('warn', 'Exit signal received. All connection closed.');
         process.exit(0);
     };
@@ -129,4 +87,7 @@ let logger = Container.get(LoggerService);
         .on('uncaughtException', onAppCloseHandler);
 })();
 logger.log('info', 'Started watcher...');
-process.send('ready');
+
+if (process.send) {
+    process.send('ready');
+}

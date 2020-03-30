@@ -4,6 +4,7 @@ import {OnError} from "../Connection/AbstractConnection";
 import ImapConnection, {OnExpunge, OnMail, OnUpdate, OnReady, OnAlert, OnUidvalidity, OnClose, OnEnd} from "../Connection/ImapConnection";
 import {ImapSimple} from "imap-simple";
 import * as os from "os";
+import {Logger} from "winston";
 
 export type SyncingInfo = {
     sync_status: string,
@@ -32,6 +33,7 @@ export default class Server
     }
 
     async connectToAllImaps(
+        logger: Logger,
         onConnectionError: OnError,
         onMail?: OnMail,
         onUpdate?: OnUpdate,
@@ -48,6 +50,7 @@ export default class Server
         this.imapConnections = this.accounts.map((account: Account) => {
             if (account.isActive) {
                 return new ImapConnection(
+                    logger,
                     {
                         account: account,
                         tls: Boolean(process.env.WATCHER_MAIL_TLS),
