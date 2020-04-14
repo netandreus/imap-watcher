@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+// This is stub sync file
+// Please replace it to real sync engine.
+// @see https://github.com/netandreus/imap-sync
+
+console.log('Sync stub called.');

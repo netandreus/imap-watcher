@@ -4,6 +4,7 @@ import {OnError} from "../Connection/AbstractConnection";
 import ImapConnection, {OnExpunge, OnMail, OnUpdate, OnReady, OnAlert, OnUidvalidity, OnClose, OnEnd} from "../Connection/ImapConnection";
 import {ImapSimple} from "imap-simple";
 import * as os from "os";
+import {Logger} from "winston";
 
 export type SyncingInfo = {
     sync_status: string,
@@ -32,6 +33,7 @@ export default class Server
     }
 
     async connectToAllImaps(
+        logger: Logger,
         onConnectionError: OnError,
         onMail?: OnMail,
         onUpdate?: OnUpdate,
@@ -48,19 +50,27 @@ export default class Server
         this.imapConnections = this.accounts.map((account: Account) => {
             if (account.isActive) {
                 return new ImapConnection(
-                    account,
-                    Boolean(process.env.MAIL_TLS),
-                    Number(process.env.MAIL_AUTH_TIMEOUT),
-                    Number(process.env.MAIL_CONN_TIMEOUT),
-                    onMail,
-                    onUpdate,
-                    onExpunge,
-                    onReady,
-                    onAlert,
-                    onUidvalidity,
-                    onError,
-                    onClose,
-                    onEnd
+                    logger,
+                    {
+                        account: account,
+                        tls: Boolean(process.env.WATCHER_MAIL_TLS),
+                        authTimeout: Number(process.env.WATCHER_MAIL_AUTH_TIMEOUT),
+                        connTimeout: Number(process.env.WATCHER_MAIL_CONN_TIMEOUT),
+                        onMail: onMail,
+                        onUpdate: onUpdate,
+                        onExpunge: onExpunge,
+                        onReady: onReady,
+                        onAlert: onAlert,
+                        onUidvalidity: onUidvalidity,
+                        onError: onError,
+                        onClose: onClose,
+                        onEnd: onEnd
+                    },
+                    {
+                        attempts: Number(process.env.WATCHER_MAX_ATTEMPTS_COUNT),
+                        timeout:  Number(process.env.WATCHER_ATTEMPTS_TIMEOUT)
+                    },
+                    onError
                 );
             }
         });
@@ -68,6 +78,14 @@ export default class Server
             return connection.connect();
         });
         await Promise.all(promises).catch(onConnectionError);
+    }
+
+    async disconnectFromAllImaps(onError: OnError)
+    {
+        let promises = this.imapConnections.map((connection: ImapConnection) => {
+            return connection.closeConnection();
+        });
+        await Promise.all(promises).catch(onError);
     }
 
     get accounts(): Account[] {

@@ -1,12 +1,18 @@
+import {Logger} from "winston";
+
 export type OnError = (err: Error) => void;
 export type ReconnectOptions = {
     timeout: number,
     attempts: number
 };
+export type AbstractConnectionOptions = {
+    internalOptions?: {}
+};
 export default abstract class AbstractConnection
 {
     private readonly _options: {};
     protected _connection: {};
+    private readonly _logger: Logger;
     /**
      * Set after openBox(!), to prevent first 'mail' event, during openBox
      */
@@ -19,10 +25,12 @@ export default abstract class AbstractConnection
     private _attemptsMade: number;
 
     constructor(
+        logger: Logger,
         options: {},
         reconnectOptions: ReconnectOptions = { timeout: 300, attempts: 3},
         onError: OnError = () => {}
     ) {
+        this._logger = logger;
         this._options = options;
         this.connection = null;
         this.connected = false;
@@ -108,11 +116,11 @@ export default abstract class AbstractConnection
                     this.onConnected(this.connection).then((connection) => {
                         this.connected = true;
                     });
-                    console.log('[ '+this.constructor.name+' ] Connected');
+                    this.logger.log('info', '['+this.constructor.name+'] Connected');
                     resolve(connect);
                 })
-                .catch(function (e) {
-                    console.log('Try ...'+attemptCount);
+                .catch((e) => {
+                    this.logger.log('warn', '['+this.constructor.name+'] Try ...'+attemptCount);
                     if (attemptCount == attempts) {
                         reject(e);
                         return;
@@ -124,6 +132,10 @@ export default abstract class AbstractConnection
                 });
         };
         return new Promise<any>(callback);
+    }
+
+    get logger(): Logger {
+        return this._logger;
     }
 
     abstract async closeConnection(): Promise<void>;

@@ -5,8 +5,14 @@
   "main": "index.js",
   "scripts": {
     "build": "./node_modules/.bin/tsc -p ./tsconfig.json",
+    "run": "node ./dist/index.js",
+    "execute": "bin/watcher",
     "interactive": "./node_modules/.bin/ts-node src/index.ts",
-    "watch": "./node_modules/.bin/tsc --watch"
+    "watch": "./node_modules/.bin/tsc --watch",
+    "start": "./node_modules/.bin/pm2 start process.yml",
+    "stop": "./node_modules/.bin/pm2 stop process.yml",
+    "monit": "./node_modules/.bin/pm2 monit",
+    "list": "./node_modules/.bin/pm2 list"
   },
   "keywords": [],
   "author": "",
@@ -25,10 +31,12 @@
     "imap-simple": "^4.3.0",
     "dotenv": "^8.2.0",
     "reflect-metadata": "^0.1.13",
-    "tsyringe": "^4.1.0",
     "mysql2": "^2.1.0",
     "util": "^0.12.2",
-    "ts-process-promises": "^1.0.2"
+    "ts-process-promises": "^1.0.2",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2",
+    "pm2": "^4.2.3"
   },
   "devDependencies": {
     "ts-node": "^6.0.3",
